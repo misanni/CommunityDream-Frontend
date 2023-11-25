@@ -6,10 +6,7 @@ export default function ContactLayout({
   }) {
     return (
       <section>
-       <Header />
-        {/* Include shared UI here e.g. a header or sidebar */}
-        <nav></nav>
-   
+ 
         {children}
       </section>
     )

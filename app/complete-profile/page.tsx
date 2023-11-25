@@ -1,244 +1,216 @@
+// Import the necessary dependencies
 "use client"
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { FcSettings } from 'react-icons/fc'; // Replace with your preferred icons
-import { HiOutlineUser, HiOutlineCalendar, HiOutlineLocationMarker } from 'react-icons/hi';
-import { GiTeacher, GiComputerFan, GiArtificialIntelligence } from 'react-icons/gi';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
-import Logo from '../../media/nest site favi con.png'
-import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
+import Logo from '../../../media/Community-Dreams-Foundation-Hi-Res-Transparent-1.png';
+import { FaTwitter, FaApple } from 'react-icons/fa';
 
-const CompleteProfilePage: React.FC = () => {
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+const BACKEND_URL = process.env.BACKEND_URL as string;
+
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
+export default function Profile() {
+  const dispatch = useDispatch();
+  const [error, setError] = useState(false);
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    username: '',
-    dob: '',
-    country: '',
-    profession: '',
-    otherProfession: '',
+    birthdate: '',
+    gender: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zip: '',
+    },
   });
-  
-  const { username,firstName, lastName } = formData;
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Implement your form submission logic here
-    console.log(formData);
+  const handleAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      address: {
+        ...prevData.address,
+        [name]: value,
+      },
+    }));
   };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+
+    e.preventDefault();
+
+    // Create an object to send to the API with profile information
+    const profileData = {
+      birthdate: formData.birthdate,
+      gender: formData.gender,
+      address: formData.address,
+    };
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/update-profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast(errorData.message, { type: 'error' });
+      } else {
+        const updatedUserData = await response.json();
+        console.log(updatedUserData);
+        toast('Profile updated successfully!', { type: 'success' });
+      }
+    } catch (error) {
+      toast('Something went wrong', { type: 'error' });
+      console.error('An error occurred:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (error) {
+      toast(error, { type: 'error' });
+    }
+  }, [error]);
 
   return (
-   <>
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className='bg-white sm:mx-auto rounded-md w-full  sm:max-w-md flex flex-col shadow-md p-3'>
-        
-        <div className="">
-        <div className="flex items-center">
-        <Image
-            className="h-12 w-auto"
-            src={Logo}
-            alt="NestSite Logo"
-            width={179.8}
-            height={78.9}
-          />
-          <h2 className="text-2xl font-bold leading-9 text-gray-900">
-            Complete your profile
-          </h2>
-        </div>
-          <p className="mt-2 text-gray-600">
-            Enter your details
-          </p>
-          <h2 className="mt-2 text-base font-semibold leading-7 text-gray-900">Profile</h2>
-          <p className="mt-1 text-sm leading-6 text-gray-600">
-            This information will be displayed publicly so be careful what you share.
-          </p>
+    <>
+      <ToastContainer theme="light" />
 
-          <form className="space-y-5 mt-4 mb-8" onSubmit={handleSubmit}>
-          
-            <div>
-            <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
-                Username
-              </label>
-            <div className="mt-1">
-                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                  <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">nestsite.io/</span>
-                  <input
-                    type="text"
-                    name="username"
-                    id="username"
-                    autoComplete="username"
-                    className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                    placeholder="Nzubechi"
-                  />
-                </div>
+      <main className="w-full flex com">
+        <div className="relative flex-1 hidden items-center justify-center h-screen  lg:flex"></div>
+        <div className="flex-1 flex items-center justify-center h-screen">
+          <div className="w-full max-w-md space-y-8 px-4 bg-white text-gray-600 sm:px-2 cardd">
+            <div className="">
+              <Image
+                className="h-10 w-auto"
+                src={Logo}
+                alt="NestSite Logo"
+                width={179.8}
+                height={78.9}
+              />
+              <div className="mt-5 space-y-2">
+                <h3 className="text-gray-800 text-2xl font-bold sm:text-3xl">
+                  Complete Your Profile
+                </h3>
               </div>
             </div>
-            <div className="col-span-full">
-              <label htmlFor="about" className="block text-sm font-medium leading-6 text-gray-900">
-                Bio
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="about"
-                  name="about"
-                  rows={3}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  defaultValue={''}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Birthdate Input */}
+              <div>
+                <label className="font-medium">Birthdate</label>
+                <input
+                  type="date"
+                  name="birthdate"
+                  onChange={handleChange}
+                  required
+                  className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg"
                 />
               </div>
-              <p className="mt-3 text-sm leading-6 text-gray-600">Write a few sentences about yourself.</p>
-            </div>
-
-            <div className="col-span-full">
-              <label htmlFor="cover-photo" className="block text-sm font-medium leading-6 text-gray-900">
-                Profile photo
-              </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <div className="text-center">
-                  <PhotoIcon className="mx-auto h-12 w-12 text-gray-300" aria-hidden="true" />
-                  <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                    >
-                      <span>Upload a file</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+              {/* Gender Radio Buttons */}
+              <div>
+                <label className="font-medium block">Gender</label>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="male"
+                      name="gender"
+                      value="male"
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <label htmlFor="male">Male</label>
                   </div>
-                  <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="female"
+                      name="gender"
+                      value="female"
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <label htmlFor="female">Female</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="other"
+                      name="gender"
+                      value="other"
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <label htmlFor="other">Other</label>
+                  </div>
                 </div>
               </div>
-            </div>
-           
-            <div className="border-t border-gray-900/10 pb-12">
-            <h2 className="text-base font-semibold leading-7 text-gray-900">Personal Information</h2>
-            <p className="mt-1 mb-1 text-sm leading-6 text-gray-600">Use a permanent address where you can receive mail.</p>
-
-            <div>
-            <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
-                Firstname
-              </label>
-              <div className="mt-2">
-                <div className="flex items-center border rounded-md border-gray-300 py-1.5 pl-3 pr-2 text-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-indigo-600 sm:text-sm sm:leading-6">
-                <HiOutlineUser className="w-6 h-6 mr-2 text-gray-400" />
+              {/* Address Form */}
+              <div>
+                <label className="font-medium block">Address</label>
+                <div className="space-y-2">
                   <input
-                    id="confirmPassword"
-                    name="lastName"
-                    type="password"
-                    autoComplete="new-password"
+                    type="text"
+                    name="street"
+                    onChange={handleAddressChange}
                     required
-                    className="w-full focus:outline-none placeholder:text-gray-400"
-                    value={lastName}
-                    onChange={handleChange}
+                    placeholder="Street"
+                    className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg"
+                  />
+                  <input
+                    type="text"
+                    name="city"
+                    onChange={handleAddressChange}
+                    required
+                    placeholder="City"
+                    className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg"
+                  />
+                  <input
+                    type="text"
+                    name="state"
+                    onChange={handleAddressChange}
+                    required
+                    placeholder="State"
+                    className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg"
+                  />
+                  <input
+                    type="text"
+                    name="zip"
+                    onChange={handleAddressChange}
+                    required
+                    placeholder="ZIP Code"
+                    className="w-full mt-2 px-3 py-2 text-gray-500 bg-transparent outline-none border focus:border-indigo-600 shadow-sm rounded-lg"
                   />
                 </div>
               </div>
-            </div>
-            <div>
-            <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
-                Lastname
-              </label>
-              <div className="mt-1">
-                <div className="flex items-center border rounded-md border-gray-300 py-1.5 pl-3 pr-2 text-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-indigo-600 sm:text-sm sm:leading-6">
-                <HiOutlineUser className="w-6 h-6 mr-2 text-gray-400" />
-                  <input
-                    id="confirmPassword"
-                    name="lastName"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    className="w-full focus:outline-none placeholder:text-gray-400"
-                    value={lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-            <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
-                Phone
-              </label>
-              <div className="mt-1">
-                <div className="flex items-center border rounded-md border-gray-300 py-1.5 pl-3 pr-2 text-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-indigo-600 sm:text-sm sm:leading-6">
-                <HiOutlineUser className="w-6 h-6 mr-2 text-gray-400" />
-                  <input
-                    id="confirmPassword"
-                    name="lastName"
-                    type="number"
-                    autoComplete="new-password"
-                    required
-                    className="w-full focus:outline-none placeholder:text-gray-400"
-                    value={lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="sm:col-span-3">
-              <label htmlFor="country" className="block text-sm font-medium leading-6 text-gray-900">
-                Country
-              </label>
-              <div className="mt-2">
-                <select
-                  id="country"
-                  name="country"
-                  autoComplete="country-name"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
-                >
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>Mexico</option>
-                </select>
-              </div>
-            </div>
-            </div>
-            
-           
-          
-            <div>
+              {/* Update Profile Button */}
               <button
                 type="submit"
-                className={`flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm
-                  ${isSubmitting ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500'}`}
-                disabled={isSubmitting}
+                className="w-full px-4 py-2 text-white font-medium bg-green-600 hover:bg-indigo-500 active:bg-green-600 rounded-lg duration-150"
               >
-                {isSubmitting ? (
-                  <div className="flex justify-center items-center">
-                    <div className="animate-spin mr-2">
-                      <svg
-                        width="20"
-                        height="20"
-                        fill="none"
-                        className="text-white border-t-2 border-b-2 border-indigo-500 border-solid rounded-full"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                      </svg>
-                    </div>
-                    Submitting...
-                  </div>
-                ) : (
-                  'Save'
-                )}
+                Update Profile
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
-        
-        </div>
-      </div>
-   </>
+      </main>
+    </>
   );
-};
-
-export default CompleteProfilePage;
+}
